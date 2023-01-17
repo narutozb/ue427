@@ -11,9 +11,9 @@ class CustomInformation:
     #
     TEXTURE2D_LIST = []
     TEXTURE2D_LIST_FIELDS = []
+
     def __init__(self):
         pass
-
 
     @classmethod
     def clear_all_information(cls):
@@ -23,32 +23,31 @@ class CustomInformation:
         cls.TEXTURE2D_LIST_FIELDS = []
 
     @classmethod
-    def get_csv_fields(cls,l:list):
-        if len(l)>0:
+    def get_csv_fields(cls, l: list):
+        if len(l) > 0:
             return list(l[0].keys())
         return []
 
-
     @staticmethod
-    def get_base_information(base_object:unreal.Object):
+    def get_base_information(base_object: unreal.Object):
         return {
-            'Name':base_object.get_name(),
-            'FullName':base_object.get_full_name(),
-            'PathName':base_object.get_path_name()
+            'Name': base_object.get_name(),
+            'FullName': base_object.get_full_name(),
+            'PathName': base_object.get_path_name()
         }
 
     @staticmethod
-    def append_information_to_list(data:dict, l:list)->None:
+    def append_information_to_list(data: dict, l: list) -> None:
         l.append(data)
 
     @classmethod
     def get_skeletal_mesh_information(cls):
         return cls.SKELETAL_MESH_LIST
 
-
     @classmethod
     def get_texture2d_information(cls):
         return cls.TEXTURE2D_LIST
+
     @classmethod
     def get_full_string_dict(cls, l=[]):
         full_string_list = []
@@ -61,13 +60,13 @@ class CustomInformation:
                     new_d[k] = v
             full_string_list.append(new_d)
         return full_string_list
+
     @staticmethod
-    def merge_two_dict(d1:dict, d2:dict):
+    def merge_two_dict(d1: dict, d2: dict):
         return {**d1, **d2}
 
-
     @classmethod
-    def write_to_csv(cls, needed_information:dict=None, csv_path=None):
+    def write_to_csv(cls, needed_information: dict = None, csv_path=None):
         """
 
         :param needed_information:
@@ -75,12 +74,12 @@ class CustomInformation:
         :return:
         """
         if not needed_information:
-            needed_information ={
-                'SkeletalMesh':cls.get_skeletal_mesh_information(),
-                'Texture2D':cls.get_texture2d_information(),
+            needed_information = {
+                'SkeletalMesh': cls.get_skeletal_mesh_information(),
+                'Texture2D': cls.get_texture2d_information(),
             }
 
-        for k,v in needed_information.items():
+        for k, v in needed_information.items():
             info = v
             type_name = k
 
@@ -111,10 +110,26 @@ class CustomSkeletalMesh(CustomInformation):
         return [i.material_slot_name.__str__() for i in self.skeletal_mesh.materials]
 
     def get_materials_interface(self):
-        return [i.material_interface.get_name().__str__() for i in self.skeletal_mesh.materials]
+        res = []
+        for i in self.skeletal_mesh.materials:
+            if i.material_interface:
+                res.append(i.material_interface.get_name())
+            else:
+                res.append('None')
+        return res
 
     def get_materials_base_material(self):
-        return [i.material_interface.get_base_material().get_name().__str__() for i in self.skeletal_mesh.materials]
+        res = []
+        for i in self.skeletal_mesh.materials:
+            if i.material_interface:
+                res.append(i.material_interface.get_base_material().get_name())
+            else:
+                res.append('None')
+
+        return res
+        # return [i.material_interface.get_base_material().get_name().__str__() for i in self.skeletal_mesh.materials if
+        #         i.material_interface is not None]
+
     def is_source_file_same(self, custom_skeletal_mesh):
         """
 
@@ -142,10 +157,9 @@ class CustomSkeletalMesh(CustomInformation):
         }
         self.append_information_to_list(
             self.merge_two_dict(
-                self.get_base_information(self.skeletal_mesh),res),
+                self.get_base_information(self.skeletal_mesh), res),
             self.SKELETAL_MESH_LIST
         )
-
 
 
 class CustomTexture2D(CustomInformation):
@@ -156,7 +170,7 @@ class CustomTexture2D(CustomInformation):
 
     def append_to_texture_2d_information(self):
         res = {
-            'SourceFileName':self.texture2d.get_editor_property('asset_import_data').get_first_filename(),
+            'SourceFileName': self.texture2d.get_editor_property('asset_import_data').get_first_filename(),
         }
         self.append_information_to_list(
             self.merge_two_dict(
@@ -181,4 +195,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
